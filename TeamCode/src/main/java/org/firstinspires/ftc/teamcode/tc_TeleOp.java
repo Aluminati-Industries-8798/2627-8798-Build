@@ -5,8 +5,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-@TeleOp(name = "PleaseWork2 (Fixed)")
-public class pleaseWork extends LinearOpMode {
+@TeleOp(name = "tc_TeleOp")
+public class tc_TeleOp extends LinearOpMode {
 
     private DcMotor frontLeft;
     private DcMotor backLeft;
@@ -50,9 +50,8 @@ public class pleaseWork extends LinearOpMode {
 
         if (opModeIsActive()) {
             telemetry.setMsTransmissionInterval(5);
-            boolean is_toggled = false;
+            String int_tog_type = "off";
             boolean launcher_is_toggled = false;
-            boolean last_dpad_state = false;
 
             while (opModeIsActive()) {
                 double drive  = -gamepad1.left_stick_y;
@@ -80,10 +79,15 @@ public class pleaseWork extends LinearOpMode {
                 frontRight.setPower(frontRightPower);
                 backRight.setPower(backRightPower);
 
-                if (gamepad1.dpad_down && !last_dpad_state) {
-                    is_toggled = !is_toggled;
+                if (gamepad1.dpad_down) {
+                    int_tog_type = "in";
                 }
-                last_dpad_state = gamepad1.dpad_down;
+                if (gamepad1.dpad_up) {
+                    int_tog_type = "out";
+                }
+                if (gamepad1.dpad_left) {
+                    int_tog_type = "off";
+                }
 
                 if (gamepad2.a) {
                     launcher_is_toggled = true;
@@ -92,12 +96,15 @@ public class pleaseWork extends LinearOpMode {
                     launcher.setPower(-1);
                 }
 
-                if (is_toggled) {
+                if (int_tog_type.equals("in")) {
                     intake.setPower(-1);
                     intake2.setPower(1);
-                } else {
+                } else if (int_tog_type.equals("off")) {
                     intake.setPower(0);
                     intake2.setPower(0);
+                } else if (int_tog_type.equals("out")) {
+                    intake.setPower(1);
+                    intake2.setPower(-1);
                 }
 
                 if (launcher_is_toggled) {
