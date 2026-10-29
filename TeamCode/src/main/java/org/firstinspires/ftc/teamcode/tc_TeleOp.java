@@ -14,7 +14,7 @@ public class tc_TeleOp extends LinearOpMode {
     private DcMotor backRight;
     private DcMotor launcher;
 
-    // the following are continuous motors and so we have to find a way to properly align these at the start... figure it out soon
+    // Continuous rotation servos for intake
     private CRServo intake;
     private CRServo intake2;
 
@@ -29,16 +29,13 @@ public class tc_TeleOp extends LinearOpMode {
         intake = hardwareMap.get(CRServo.class, "intake");
         intake2 = hardwareMap.get(CRServo.class, "intake2");
 
-        // i had to reverse these, if they ever do sm weird replace REVERSE with FORWARD and vice versa
-        // important: left side is REVERSED! right side is forward and MUST NOT BE TOUCHED!!!
-        // important: front wheels are side-to-side, back wheels are parallel with the main frame
-        // note: check to see if changing the front wheels messes anything up - the back motors may remain the same (update: yes they are reversed, this makes sense and is more pleasing
+        // Motor directions
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
         backLeft.setDirection(DcMotor.Direction.REVERSE);
         frontRight.setDirection(DcMotor.Direction.FORWARD);
         backRight.setDirection(DcMotor.Direction.FORWARD);
 
-        // this was in the original code and idk what these do exactly but i'm not touching them out of an abundance of caution
+        // Run modes
         frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -58,11 +55,18 @@ public class tc_TeleOp extends LinearOpMode {
                 double strafe =  gamepad1.left_stick_x;
                 double rotate =  gamepad1.right_stick_x;
 
-                double frontLeftPower  = drive + strafe + rotate;
-                double backLeftPower   = drive - strafe + rotate;
-                double frontRightPower = drive - strafe - rotate;
-                double backRightPower  = drive + strafe - rotate;
+                // Front wheels: side-to-side, moving in the same direction with strafe
+                // This is really bad: god help me
+                double frontLeftPower  = strafe + rotate;
+                double frontRightPower = strafe - rotate;
 
+                // Back wheels: parallel with frame (drive + rotate),
+                // with half-power opposite movement for strafing
+                double backLeftPower   = drive - (0.5 * strafe) + rotate;
+                double backRightPower  = drive + (0.5 * strafe) - rotate;
+                // ---------------------------------------------
+
+                // Prevent motor power clipping above 1.0
                 double max = Math.max(Math.abs(frontLeftPower), Math.abs(backLeftPower));
                 max = Math.max(max, Math.abs(frontRightPower));
                 max = Math.max(max, Math.abs(backRightPower));
@@ -79,6 +83,7 @@ public class tc_TeleOp extends LinearOpMode {
                 frontRight.setPower(frontRightPower);
                 backRight.setPower(backRightPower);
 
+                // Intake controls (Gamepad 1 Dpad)
                 if (gamepad1.dpad_down) {
                     int_tog_type = "in";
                 }
@@ -89,6 +94,7 @@ public class tc_TeleOp extends LinearOpMode {
                     int_tog_type = "off";
                 }
 
+                // Launcher controls (Gamepad 2)
                 if (gamepad2.a) {
                     launcher_is_toggled = true;
                 } else if (gamepad2.b) {
@@ -96,6 +102,7 @@ public class tc_TeleOp extends LinearOpMode {
                     launcher.setPower(-1);
                 }
 
+                // Apply intake states
                 if (int_tog_type.equals("in")) {
                     intake.setPower(-1);
                     intake2.setPower(1);
@@ -107,6 +114,7 @@ public class tc_TeleOp extends LinearOpMode {
                     intake2.setPower(-1);
                 }
 
+                // Apply launcher state
                 if (launcher_is_toggled) {
                     launcher.setPower(1);
                 } else {

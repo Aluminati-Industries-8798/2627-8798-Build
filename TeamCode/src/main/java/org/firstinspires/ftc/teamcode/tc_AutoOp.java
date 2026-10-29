@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-@Autonomous(name = "tc_AutoOp")
+@Autonomous(name = "tc_AutoOp_zaza")
 public class tc_AutoOp extends LinearOpMode {
 
     private DcMotor frontLeft;
